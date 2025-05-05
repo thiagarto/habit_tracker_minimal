@@ -2,11 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+//import '../models/habit.dart';
 import '../providers/habit_provider.dart';
 
 /// 📋 Lista de hábitos con encabezado de día actual y visualización tipo GitHub
 class HabitList extends StatelessWidget {
-  const HabitList({super.key});
+  final bool editMode;
+
+  const HabitList({super.key, this.editMode = false});
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +95,7 @@ class HabitList extends StatelessWidget {
                               spacing: 4,
                               children: List.generate(7, (dayIndex) {
                                 final done = habit.completedDays[dayIndex];
-                                return Container(
+                                final box = Container(
                                   width: 14,
                                   height: 14,
                                   decoration: BoxDecoration(
@@ -102,6 +105,17 @@ class HabitList extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(3),
                                   ),
                                 );
+
+                                // Si estamos en modo edición, hacer clickeable
+                                if (editMode) {
+                                  return GestureDetector(
+                                    onTap: () =>
+                                        habitProvider.toggleDay(index, dayIndex),
+                                    child: box,
+                                  );
+                                } else {
+                                  return box;
+                                }
                               }),
                             ),
                           ],
@@ -123,7 +137,8 @@ class HabitList extends StatelessWidget {
                         ),
 
                         // 📌 Tap para marcar/desmarcar el día de hoy
-                        onTap: () => habitProvider.toggleDay(index, today),
+                        onTap: () =>
+                            habitProvider.toggleDay(index, today),
 
                         // 🗑️ Eliminar hábito
                         trailing: IconButton(

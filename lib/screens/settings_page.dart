@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:habit_tracker_minimal/screens/premium_page.dart';
-import 'package:habit_tracker_minimal/screens/stats_page.dart';
 import 'package:provider/provider.dart';
 import '../providers/habit_provider.dart';
 
@@ -22,18 +21,6 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Configuración'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bar_chart),
-            tooltip: 'Ver estadísticas',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const StatsPage()),
-              );
-            },
-          ),
-        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),

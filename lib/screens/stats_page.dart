@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/habit_provider.dart';
 import '../widgets/premium_stats_panel.dart';
-import '../screens/premium_page.dart';
+import '../widgets/charts/monthly_progress_chart.dart';
+import 'premium_page.dart';
 
 class StatsPage extends StatefulWidget {
   const StatsPage({super.key});
@@ -15,12 +16,6 @@ class StatsPage extends StatefulWidget {
 
 class _StatsPageState extends State<StatsPage> {
   int _currentIndex = 0;
-
-  final List<Widget> _pages = [
-    const PremiumStatsPanel(), // 📊 Semanal
-    Center(child: Text('📈 Progreso mensual (pendiente)')),
-    Center(child: Text('🏆 Ranking de hábitos (pendiente)')),
-  ];
 
   final List<BottomNavigationBarItem> _items = const [
     BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Semanal'),
@@ -50,11 +45,18 @@ class _StatsPageState extends State<StatsPage> {
       );
     }
 
+    // 🔀 Selección de página según índice
+    final List<Widget> pages = [
+      const PremiumStatsPanel(),
+      const MonthlyProgressChart(),
+     const  Center(child: Text('🏆 Ranking de hábitos (pendiente)')),
+    ];
+
     return Scaffold(
       appBar: AppBar(title: const Text('Estadísticas')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: _pages[_currentIndex],
+        child: pages[_currentIndex],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
