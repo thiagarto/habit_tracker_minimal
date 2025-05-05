@@ -8,8 +8,13 @@ import '../repositories/habit_repository.dart';
 /// 📊 Proveedor central que expone los datos y lógica al UI, usando HabitManager internamente.
 class HabitProvider extends ChangeNotifier {
   final HabitManager _manager = HabitManager();
-  final HabitRepository _repository = HabitRepository();
+  final HabitRepository _repository;
 
+  // 🔹 Constructor principal
+  HabitProvider() : _repository = HabitRepository();
+
+  // 🔹 Constructor para tests
+  HabitProvider.forTesting(this._repository);
   List<Habit> get habits => _manager.habits;
   bool get isPremium => _manager.isPremium;
 

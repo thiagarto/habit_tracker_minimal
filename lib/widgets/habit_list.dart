@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/habit_provider.dart';
-// import '../models/habit.dart'; // ❌ Eliminado porque no se usa directamente en este archivo
 
 /// 📋 Lista de hábitos con encabezado de día actual y visualización tipo GitHub
 class HabitList extends StatelessWidget {
@@ -84,7 +83,7 @@ class HabitList extends StatelessWidget {
                             Text(
                               habit.name,
                               style: const TextStyle(
-                                  fontWeight: FontWeight.w600),
+                                  fontWeight: FontWeight.w600, fontSize: 16),
                             ),
                             const SizedBox(height: 8),
 

@@ -1,41 +1,48 @@
+// lib/services/message_service.dart
+
 import 'package:flutter/material.dart';
+import 'i_message_service.dart';
 
-class MessageService {
-  static void Function(BuildContext, String) showCenterError = _defaultCenterError;
+class MessageService implements IMessageService {
+  static void Function(BuildContext, String) showCenterErrorFunc = _defaultCenterError;
 
-@visibleForTesting
-static void resetDefaults() {
-  showCenterError = _defaultCenterError;
-}
+  @visibleForTesting
+  static void resetDefaults() {
+    showCenterErrorFunc = _defaultCenterError;
+  }
 
+  @override
+  void showCenterError(BuildContext context, String message) {
+    showCenterErrorFunc(context, message);
+  }
 
-static void _defaultCenterError(BuildContext context, String message) {
-  final overlay = Overlay.of(context);
-  final entry = OverlayEntry(
-    builder: (_) => _CenteredFadeMessage(message: message),
-  );
-  overlay.insert(entry);
-  Future.delayed(const Duration(seconds: 3), () => entry.remove());
-}
+  static void _defaultCenterError(BuildContext context, String message) {
+    final overlay = Overlay.of(context);
+    final entry = OverlayEntry(
+      builder: (_) => _CenteredFadeMessage(message: message),
+    );
+    overlay.insert(entry);
+    Future.delayed(const Duration(seconds: 3), () => entry.remove());
+  }
 
-
-  static void showDialogLimitReached(BuildContext context, {required VoidCallback onActivatePremium}) {
+  @override
+  void showDialogLimitReached(BuildContext context, {required VoidCallback onActivatePremium}) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Límite alcanzado'),
         content: const Text(
           'Has alcanzado el límite de 3 hábitos en la versión gratuita. Activa Premium para agregar más hábitos.',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('Cerrar'),
           ),
           ElevatedButton(
             onPressed: () {
               onActivatePremium();
-              Navigator.pop(context);
+              Navigator.of(dialogContext).pop();
             },
             child: const Text('Activar Premium'),
           ),
@@ -81,7 +88,7 @@ class _CenteredFadeMessageState extends State<_CenteredFadeMessage>
     return Positioned.fill(
       child: IgnorePointer(
         child: Align(
-          alignment: const Alignment(0, -0.2), // ⬇ más abajo del centro
+          alignment: const Alignment(0, -0.2),
           child: FadeTransition(
             opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_fade),
             child: Container(

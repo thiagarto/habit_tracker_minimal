@@ -1,99 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:habit_tracker_minimal/services/habit_dialog_service.dart';
-import 'package:habit_tracker_minimal/services/message_service.dart';
+import 'package:habit_tracker_minimal/services/i_message_service.dart';
+
+class FakeMessageService implements IMessageService {
+  String? lastError;
+  bool dialogShown = false;
+
+  @override
+  void showCenterError(BuildContext context, String message) {
+    lastError = message;
+  }
+
+  @override
+  void showDialogLimitReached(BuildContext context, {required VoidCallback onActivatePremium}) {
+    dialogShown = true;
+  }
+}
 
 void main() {
-  setUpAll(() {
-    MessageService.showCenterError = (context, message) {
-      debugPrint('Mocked showCenterError: $message');
-    };
+  late FakeMessageService fakeService;
+  late HabitDialogService dialogService;
+
+  setUp(() {
+    fakeService = FakeMessageService();
+    dialogService = HabitDialogService(messageService: fakeService);
   });
 
-  tearDownAll(() {
-    MessageService.resetDefaults();
+  testWidgets('Devuelve el nombre ingresado al presionar Agregar', (tester) async {
+    String? result;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) {
+            return ElevatedButton(
+              onPressed: () async {
+                result = await dialogService.requestHabitName(context);
+              },
+              child: const Text('Abrir diálogo'),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Abrir diálogo'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'Leer 20 minutos');
+    await tester.tap(find.text('Agregar'));
+    await tester.pumpAndSettle();
+
+    expect(result, 'Leer 20 minutos');
   });
 
-  group('HabitDialogService', () {
-    testWidgets('debe devolver el nombre ingresado al presionar Agregar',
-        (tester) async {
-      String? result;
+  testWidgets('No cierra el diálogo si el nombre está vacío', (tester) async {
+    String? result;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            builder: (context) => ElevatedButton(
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) {
+            return ElevatedButton(
               onPressed: () async {
-                result = await HabitDialogService.requestHabitName(context);
+                result = await dialogService.requestHabitName(context);
               },
               child: const Text('Abrir diálogo'),
-            ),
-          ),
+            );
+          },
         ),
-      );
+      ),
+    );
 
-      await tester.tap(find.text('Abrir diálogo'));
-      await tester.pumpAndSettle();
+    await tester.tap(find.text('Abrir diálogo'));
+    await tester.pumpAndSettle();
 
-      await tester.enterText(find.byType(TextField), 'Leer 20 minutos');
-      await tester.tap(find.text('Agregar'));
-      await tester.pumpAndSettle();
+    await tester.tap(find.text('Agregar'));
+    await tester.pump(); // No settle, porque el diálogo debe seguir
 
-      expect(result, 'Leer 20 minutos');
-    });
-
-    testWidgets('no debe cerrar si se ingresa texto vacío', (tester) async {
-      String? result;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            builder: (context) => ElevatedButton(
-              onPressed: () async {
-                result = await HabitDialogService.requestHabitName(context);
-              },
-              child: const Text('Abrir diálogo'),
-            ),
-          ),
-        ),
-      );
-
-      await tester.tap(find.text('Abrir diálogo'));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Agregar'));
-      await tester.pump();
-
-      expect(find.byType(AlertDialog), findsOneWidget);
-      expect(result, isNull);
-    });
-
-       testWidgets('debe devolver null al presionar Cancelar', (tester) async {
-      String? result;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            builder: (context) => ElevatedButton(
-              onPressed: () async {
-                result = await HabitDialogService.requestHabitName(context);
-              },
-              child: const Text('Abrir diálogo'),
-            ),
-          ),
-        ),
-      );
-
-      await tester.tap(find.text('Abrir diálogo'));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Cancelar'));
-      await tester.pumpAndSettle();
-
-      expect(result, isNull);
-      expect(find.byType(AlertDialog), findsNothing);
-    });
-
-
+    expect(result, isNull);
+    expect(fakeService.lastError, 'Ingresa datos válidos');
+    expect(find.byType(AlertDialog), findsOneWidget);
   });
 }

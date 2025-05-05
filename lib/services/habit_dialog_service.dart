@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
-import 'message_service.dart';
+import 'i_message_service.dart';
 
 class HabitDialogService {
-  static Future<String?> requestHabitName(BuildContext context) async {
+  final IMessageService messageService;
+
+  HabitDialogService({required this.messageService});
+
+  Future<String?> requestHabitName(BuildContext context) async {
     final controller = TextEditingController();
     final focusNode = FocusNode();
 
     return showDialog<String>(
       context: context,
-      barrierDismissible: false, // Para evitar cierres conflictivos
+      barrierDismissible: false,
       builder: (dialogContext) {
         bool submitted = false;
 
         void submit() {
           final name = controller.text.trim();
           if (name.isEmpty) {
-            MessageService.showCenterError(dialogContext, 'Ingresa datos válidos');
+            messageService.showCenterError(dialogContext, 'Ingresa datos válidos');
             return;
           }
 
