@@ -1,14 +1,21 @@
 // lib/screens/settings_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/habit_storage.dart';
+import '../providers/habit_provider.dart';
 
-class SettingsPage extends StatelessWidget {
+/// 📋 Pantalla de configuración con opciones de Premium y limpieza de datos
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
   @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  @override
   Widget build(BuildContext context) {
-    final storage = Provider.of<HabitStorage>(context, listen: false);
+    final habitProvider = Provider.of<HabitProvider>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(
@@ -17,24 +24,28 @@ class SettingsPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // 🌟 Activar Premium (sincrónico)
           ListTile(
             leading: const Icon(Icons.workspace_premium),
             title: const Text('Activar Premium'),
             subtitle: const Text('Desbloquea hábitos ilimitados'),
-            onTap: () async {
-              storage.activatePremium();
+            onTap: () {
+              habitProvider.activatePremium();
+              if (!mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Premium activado.')),
               );
             },
           ),
           const Divider(),
+          // 🧹 Borrar todos los datos usando callbacks en vez de async/await
           ListTile(
             leading: const Icon(Icons.delete_forever, color: Colors.red),
             title: const Text('Borrar todos los datos'),
             subtitle: const Text('Elimina todos los hábitos y preferencias guardadas'),
-            onTap: () async {
-              final confirm = await showDialog<bool>(
+            onTap: () {
+              // Mostrar diálogo de confirmación
+              showDialog<bool>(
                 context: context,
                 builder: (_) => AlertDialog(
                   title: const Text('¿Estás seguro?'),
@@ -50,14 +61,18 @@ class SettingsPage extends StatelessWidget {
                     ),
                   ],
                 ),
-              );
-
-              if (confirm == true) {
-                await storage.clearAllData();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Todos los datos fueron eliminados.')),
-                );
-              }
+              ).then((confirm) {
+                // Si el usuario confirmó
+                if (confirm == true) {
+                  // Limpiar datos y luego mostrar SnackBar dentro del mismo context
+                  habitProvider.clearAllData().then((_) {
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Todos los datos fueron eliminados.')),
+                    );
+                  });
+                }
+              });
             },
           ),
         ],

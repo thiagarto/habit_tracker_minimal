@@ -1,23 +1,20 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
-//import 'package:habit_tracker_minimal/dev/test_home.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'screens/home_page.dart';
-import 'screens/settings_page.dart';
-import 'services/habit_storage.dart';
+import 'providers/habit_provider.dart';
 
 void main() async {
-  // Asegura que Flutter esté inicializado antes de usar async
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Crea una instancia del almacenamiento de hábitos y la inicializa
-  final habitStorage = HabitStorage();
-  await habitStorage.init();
+  // Crea e inicializa el nuevo provider basado en manager + repository
+  final habitProvider = HabitProvider();
+  await habitProvider.init();
 
-  // Ejecuta la app y proporciona habitStorage a través de Provider
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => habitStorage,
+    ChangeNotifierProvider<HabitProvider>.value(
+      value: habitProvider,
       child: const MyApp(),
     ),
   );
@@ -30,21 +27,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Contador de Hábitos',
-      debugShowCheckedModeBanner: false, // Oculta el banner DEBUG
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal), // Colores base
-        useMaterial3: true, // Activa Material 3
-        textTheme: GoogleFonts.ralewayTextTheme(), // Tipografía moderna
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+        useMaterial3: true,
+        textTheme: GoogleFonts.ralewayTextTheme(),
       ),
       darkTheme: ThemeData.dark().copyWith(
         textTheme: GoogleFonts.ralewayTextTheme(
           ThemeData.dark().textTheme,
         ),
       ),
-      themeMode: ThemeMode.system, // Usa el tema del sistema (oscuro/claro)
+      themeMode: ThemeMode.system,
       home: const HomePage(),
-      //home: const TestHome(), // <- usar para pruebas
-
     );
   }
 }
