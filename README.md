@@ -6,11 +6,13 @@ App Flutter de seguimiento de hábitos, diseñada para ser ligera, clara y exten
 
 ## 📱 Características principales
 
-- ✅ Crear hábitos con nombre y recordatorio opcional
-- 🔔 Recordatorio visual (sin notificaciones nativas aún)
+- ✅ Crear hábitos con nombre, icono y color personalizado
+- 🔔 Recordatorio visual opcional con hora
 - 💾 Persistencia local con SharedPreferences
-- 🌱 Límite de 3 hábitos en versión gratuita (Premium opcional)
-- 🎯 Seguimiento semanal tipo "GitHub contributions"
+- 🌱 Límite de 3 hábitos en versión gratuita (Premium desbloquea ilimitado)
+- 🎯 Seguimiento semanal estilo "GitHub contributions"
+- 🌀 Vista Premium con tarjetas modernas y porcentaje de progreso
+- 📊 Estadísticas semanales y mensuales (Premium)
 - 🧼 Reinicio semanal automático
 - ⚙️ Pantalla de configuración (activar Premium, borrar todo)
 
@@ -29,7 +31,8 @@ lib/
 ├── repositories/        # Persistencia de datos
 ├── screens/             # Pantallas
 ├── services/            # Diálogos, mensajes, premium
-├── widgets/             # Componentes visuales
+├── widgets/             # Componentes visuales reutilizables
+│   ├── premium/         # Componentes visuales exclusivos Premium
 └── main.dart            # Punto de entrada
 ```
 
@@ -37,7 +40,7 @@ lib/
 
 ## 🧪 Pruebas
 
-Pruebas unitarias y de widgets usando `flutter_test`:
+Pruebas unitarias usando `flutter_test`:
 
 ```bash
 flutter test
@@ -48,6 +51,9 @@ Estructura:
 test/
 ├── controllers/
 ├── services/
+├── managers/
+├── providers/
+├── repositories/
 ```
 
 ---
@@ -55,11 +61,13 @@ test/
 ## 🚀 Tecnologías usadas
 
 - Flutter 3.x
-- Dart null safety
-- Provider
+- Dart con null safety
+- Provider (gestión de estado)
 - SharedPreferences
 - Google Fonts (Raleway)
 - Flutter Test
+- fl_chart (gráficos)
+- flutter_iconpicker (selección de íconos)
 
 ---
 
@@ -71,10 +79,11 @@ Este proyecto fue desarrollado como parte de un portafolio educativo. Se utiliz�
 
 ## 📌 Por hacer
 
-- Notificaciones locales reales
-- Soporte multi-idioma
-- Autenticación y sincronización con nube
-- Estadísticas de hábitos completados
+- [ ] Notificaciones locales reales (flutter_local_notifications)
+- [ ] Soporte multi-idioma
+- [ ] Autenticación y sincronización con la nube
+- [ ] Animaciones fluidas entre pantallas
+- [ ] Ranking y logros de hábitos
 
 ---
 
