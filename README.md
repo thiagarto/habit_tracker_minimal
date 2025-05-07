@@ -2,7 +2,9 @@
 
 App Flutter de seguimiento de hábitos, diseñada para ser ligera, clara y extensible. Aplicando principios de arquitectura SOLID, separación de responsabilidades, pruebas y buenas prácticas modernas.
 
+
 ---
+
 
 ## 📱 Características principales
 
