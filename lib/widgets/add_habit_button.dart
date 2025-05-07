@@ -14,17 +14,16 @@ class AddHabitButton extends StatelessWidget {
       onPressed: () async {
         final provider = Provider.of<HabitProvider>(context, listen: false);
 
-        // ✅ Verifica límite Premium
+        // ✅ Verifica si se puede agregar un nuevo hábito
         final canAdd = await PremiumGuardService.canAddHabit(context, provider);
         if (!canAdd) return;
 
-        // 📋 Mostrar el formulario de hábito completo
+        // 📝 Abre el formulario si se puede
         final habit = await showDialog<Habit>(
           context: context,
           builder: (_) => const HabitFormDialog(),
         );
 
-        // ✅ Agregar si no es null
         if (habit != null) {
           provider.addHabit(habit);
         }

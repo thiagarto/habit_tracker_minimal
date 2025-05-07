@@ -2,24 +2,23 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-//import '../models/habit.dart';
 import '../providers/habit_provider.dart';
+//import '../models/habit.dart';
+import 'premium_habit_card.dart';
+import '../theme.dart';
 
-/// 📋 Lista de hábitos con encabezado de día actual y visualización tipo GitHub
 class HabitList extends StatelessWidget {
   final bool editMode;
-
   const HabitList({super.key, this.editMode = false});
 
   @override
   Widget build(BuildContext context) {
     final habitProvider = Provider.of<HabitProvider>(context);
+    final isPremium = habitProvider.isPremium;
 
-    // 📆 Determina el índice del día actual (lunes = 0, domingo = 6)
     final raw = DateTime.now().weekday;
     final today = (raw == 7) ? 6 : raw - 1;
 
-    // 🗓️ Nombres de los días de la semana
     const dayNames = [
       'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'
     ];
@@ -29,123 +28,48 @@ class HabitList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 🔠 Título con el día actual
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Row(
             children: [
-              const Icon(Icons.calendar_today, color: Colors.teal),
+              const Icon(Icons.calendar_today, color: mainColor),
               const SizedBox(width: 8),
               Text(
                 'Hábitos del $currentDayName',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Colors.teal,
+                      color: mainColor,
                     ),
               ),
             ],
           ),
         ),
-
         const SizedBox(height: 12),
-
-        // 📦 Lista de hábitos o mensaje si está vacía
         Expanded(
           child: habitProvider.habits.isEmpty
               ? const Center(
                   child: Text(
-                    'Sin hábitos aún. Agrega uno para comenzar 📅',
+                    'Sin hábitos aún. Agrega uno para comenzar 🗕️',
                     style: TextStyle(color: Colors.grey),
                   ),
                 )
               : ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 160),
                   itemCount: habitProvider.habits.length,
                   itemBuilder: (context, index) {
                     final habit = habitProvider.habits[index];
 
-                    // 🛡️ Asegura que tenga 7 valores (uno por día)
                     if (habit.completedDays.length != 7) {
                       habit.completedDays = List.filled(7, false);
                     }
 
-                    return Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
-                      margin: const EdgeInsets.symmetric(
-                          vertical: 8, horizontal: 4),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-
-                        // 🏷️ Título del hábito y mini gráfico de progreso
-                        title: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              habit.name,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.w600, fontSize: 16),
-                            ),
-                            const SizedBox(height: 8),
-
-                            // 🔳 Cuadros tipo GitHub para los 7 días
-                            Wrap(
-                              spacing: 4,
-                              children: List.generate(7, (dayIndex) {
-                                final done = habit.completedDays[dayIndex];
-                                final box = Container(
-                                  width: 14,
-                                  height: 14,
-                                  decoration: BoxDecoration(
-                                    color: done
-                                        ? Colors.teal
-                                        : Colors.grey.shade300,
-                                    borderRadius: BorderRadius.circular(3),
-                                  ),
-                                );
-
-                                // Si estamos en modo edición, hacer clickeable
-                                if (editMode) {
-                                  return GestureDetector(
-                                    onTap: () =>
-                                        habitProvider.toggleDay(index, dayIndex),
-                                    child: box,
-                                  );
-                                } else {
-                                  return box;
-                                }
-                              }),
-                            ),
-                          ],
-                        ),
-
-                        // 🎯 Círculo de acción para marcar el día actual
-                        leading: CircleAvatar(
-                          backgroundColor: habit.completedDays[today]
-                              ? Colors.teal.shade100
-                              : Colors.grey.shade200,
-                          child: Icon(
-                            habit.completedDays[today]
-                                ? Icons.check
-                                : Icons.circle_outlined,
-                            color: habit.completedDays[today]
-                                ? Colors.teal
-                                : Colors.grey,
-                          ),
-                        ),
-
-                        // 📌 Tap para marcar/desmarcar el día de hoy
-                        onTap: () =>
-                            habitProvider.toggleDay(index, today),
-
-                        // 🗑️ Eliminar hábito
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () => habitProvider.removeHabit(index),
-                        ),
-                      ),
+                    return PremiumHabitCard(
+                      habit: habit,
+                      today: today,
+                      editMode: editMode,
+                      onToggleToday: () => habitProvider.toggleDay(index, today),
+                      onToggleDay: (dayIndex) => habitProvider.toggleDay(index, dayIndex),
+                      onDelete: () => habitProvider.removeHabit(index),
                     );
                   },
                 ),

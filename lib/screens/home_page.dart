@@ -6,9 +6,6 @@ import 'package:habit_tracker_minimal/widgets/add_habit_button.dart';
 import 'package:habit_tracker_minimal/screens/settings_page.dart';
 import 'package:habit_tracker_minimal/screens/stats_page.dart';
 
-// 🔧 Solo para desarrollador: habilita edición de cuadraditos
-const bool kDebugEditSquares = true;
-
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -22,16 +19,14 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // 🔹 AppBar con título, configuración y botón de edición (solo dev)
       appBar: AppBar(
         title: const Text('Mis Hábitos'),
         actions: [
-          if (kDebugEditSquares)
-            IconButton(
-              icon: Icon(isEditMode ? Icons.edit_off : Icons.edit),
-              tooltip: 'Editar Días',
-              onPressed: () => setState(() => isEditMode = !isEditMode),
-            ),
+          IconButton(
+            icon: Icon(isEditMode ? Icons.edit_off : Icons.edit),
+            tooltip: 'Editar Días',
+            onPressed: () => setState(() => isEditMode = !isEditMode),
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () => Navigator.push(
@@ -41,14 +36,10 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-
-      // 🔹 Contenido principal: lista de hábitos
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: HabitList(editMode: isEditMode),
       ),
-
-      // 🔹 Botones flotantes: estadísticas y agregar hábito
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

@@ -1,70 +1,76 @@
-// lib/widgets/charts/monthly_progress_chart.dart
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import '../../providers/habit_provider.dart';
 
-/// 📈 Gráfico de línea mensual con cantidad de días real del mes.
-/// El progreso total es proporcional a la cantidad de días cumplidos vs días del mes.
 class MonthlyProgressChart extends StatelessWidget {
   const MonthlyProgressChart({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
-    final daysInMonth = DateUtils.getDaysInMonth(now.year, now.month);
+    final provider = Provider.of<HabitProvider>(context);
+    final habits = provider.habits;
 
-    // 🔧 Por ahora todos los días valen 0%, para permitir edición manual
-    final List<FlSpot> progressSpots = List.generate(
-      daysInMonth,
-      (i) => FlSpot((i + 1).toDouble(), 0),
-    );
+    // Inicializar 4 semanas
+    final List<int> completadosPorSemana = List.filled(4, 0);
+    final List<int> posiblesPorSemana = List.filled(4, 0);
 
-    return LineChart(
-      LineChartData(
+    for (var habit in habits) {
+      for (int i = 0; i < 7; i++) {
+        final semana = i ~/ 2; // Simulación: días 0-1 -> semana 0, etc.
+        if (semana < 4) {
+          posiblesPorSemana[semana]++;
+          if (habit.completedDays[i]) {
+            completadosPorSemana[semana]++;
+          }
+        }
+      }
+    }
+
+    List<BarChartGroupData> barras = List.generate(4, (i) {
+      final completados = completadosPorSemana[i];
+      final posibles = posiblesPorSemana[i].clamp(1, 100); // evitar división por 0
+      final porcentaje = (completados / posibles) * 100;
+
+      return BarChartGroupData(
+        x: i,
+        barRods: [
+          BarChartRodData(
+            toY: porcentaje,
+            width: 22,
+            color: Colors.teal,
+            borderRadius: BorderRadius.circular(6),
+          ),
+        ],
+      );
+    });
+
+    return BarChart(
+      BarChartData(
+        maxY: 100,
+        minY: 0,
+        barGroups: barras,
         titlesData: FlTitlesData(
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              interval: (daysInMonth / 6).floorToDouble(),
-              getTitlesWidget: (value, _) => Text('${value.toInt()}'),
+              getTitlesWidget: (value, _) {
+                return Text('Semana ${value.toInt() + 1}');
+              },
             ),
           ),
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 28,
               interval: 20,
               getTitlesWidget: (value, _) => Text('${value.toInt()}%'),
             ),
           ),
-          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
-        lineBarsData: [
-          LineChartBarData(
-            spots: progressSpots,
-            isCurved: true,
-            color: Colors.teal,
-            barWidth: 3,
-            belowBarData: BarAreaData(show: true, color: Colors.teal.withOpacity(0.3)),
-            dotData: FlDotData(show: true),
-          ),
-        ],
-        gridData: FlGridData(show: true),
-        borderData: FlBorderData(
-          show: true,
-          border: const Border.symmetric(
-            horizontal: BorderSide(color: Colors.black26),
-            vertical: BorderSide(color: Colors.black26),
-          ),
-        ),
-        minX: 1,
-        maxX: daysInMonth.toDouble(),
-        minY: 0,
-        maxY: 100,
+        gridData: const FlGridData(show: true),
+        borderData: FlBorderData(show: false),
       ),
     );
   }

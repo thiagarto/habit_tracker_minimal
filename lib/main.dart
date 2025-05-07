@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
           ThemeData.dark().textTheme,
         ),
       ),
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.dark,
       home: const HomePage(),
     );
   }

@@ -3,13 +3,11 @@
 import 'package:flutter/material.dart';
 import '../controllers/habit_form_controller.dart';
 import '../services/i_message_service.dart';
-import '../services/message_service.dart'; // implementación concreta
+import '../services/message_service.dart';
 import 'package:flutter_spinner_time_picker/flutter_spinner_time_picker.dart';
-
 
 class HabitFormDialog extends StatefulWidget {
   const HabitFormDialog({super.key, this.messageService});
-
   final IMessageService? messageService;
 
   @override
@@ -27,7 +25,6 @@ class _HabitFormDialogState extends State<HabitFormDialog> {
     _controller = HabitFormController();
     _messageService = widget.messageService ?? MessageService();
     _focusNode = FocusNode();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
@@ -49,33 +46,46 @@ class _HabitFormDialogState extends State<HabitFormDialog> {
     Navigator.pop(context, habit);
   }
 
- Future<void> _pickTime() async {
-  final pickedTime = await showSpinnerTimePicker(
-    context,
-    initTime: _controller.reminderTime ?? TimeOfDay.now(),
-    is24HourFormat: false,
-    title: 'Selecciona una hora',
-    backgroundColor: Colors.white,
-    foregroundColor: Colors.black,
-    titleStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-    buttonTextStyle: const TextStyle(fontSize: 16, color: Colors.white),
-    barrierDismissible: true,
-    buttonStyle: const ButtonStyle(
-      backgroundColor: WidgetStatePropertyAll(Colors.teal),
-    ),
-  );
+  Future<void> _pickTime() async {
+    final pickedTime = await showSpinnerTimePicker(
+      context,
+      initTime: _controller.reminderTime ?? TimeOfDay.now(),
+      is24HourFormat: false,
+      title: 'Selecciona una hora',
+      backgroundColor: Colors.white,
+      foregroundColor: Colors.black,
+      titleStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      buttonTextStyle: const TextStyle(fontSize: 16, color: Colors.white),
+      barrierDismissible: true,
+      buttonStyle: const ButtonStyle(
+        backgroundColor: WidgetStatePropertyAll(Colors.teal),
+      ),
+    );
 
-  if (pickedTime != null) {
-    setState(() => _controller.reminderTime = pickedTime);
+    if (pickedTime != null) {
+      setState(() => _controller.reminderTime = pickedTime);
+    }
   }
-}
-
-
-
-
 
   @override
   Widget build(BuildContext context) {
+    const colorOptions = [
+      Colors.teal,
+      Colors.deepPurple,
+      Colors.orange,
+      Colors.green,
+      Colors.blue,
+      Colors.pink,
+      Colors.brown,
+      Colors.red,
+      Colors.yellow,
+      Colors.cyan,
+      Colors.indigo,
+      Colors.purple,
+    ];
+
+    const double circleSize = 32;
+
     return AlertDialog(
       title: const Text('Nuevo Hábito'),
       content: SingleChildScrollView(
@@ -129,6 +139,36 @@ class _HabitFormDialogState extends State<HabitFormDialog> {
                     onPressed: _pickTime,
                   ),
               ],
+            ),
+            const SizedBox(height: 16),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Color del hábito',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 12,     // separación horizontal entre círculos
+              runSpacing: 12,  // separación vertical entre filas
+              children: colorOptions.map((color) {
+                final isSelected = _controller.selectedColor == color;
+                return GestureDetector(
+                  onTap: () => setState(() => _controller.selectedColor = color),
+                  child: Container(
+                    width: circleSize,
+                    height: circleSize,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: isSelected
+                          ? Border.all(color: Colors.black, width: 3)
+                          : null,
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
           ],
         ),

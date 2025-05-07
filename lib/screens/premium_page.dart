@@ -1,5 +1,3 @@
-// lib/screens/premium_page.dart
-
 import 'package:flutter/material.dart';
 
 class PremiumPage extends StatelessWidget {
@@ -39,8 +37,28 @@ class PremiumPage extends StatelessWidget {
             const Spacer(),
             Center(
               child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pop(context, true); // devuelve true para activar Premium
+                onPressed: () async {
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: const Text('Procesando pago...'),
+                      content: const Text('Simulando compra.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Cancelar'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Confirmar pago'),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (confirmed == true) {
+                    Navigator.pop(context, true); // Retorna true al caller
+                  }
                 },
                 icon: const Icon(Icons.workspace_premium),
                 label: const Text('Activar Premium'),

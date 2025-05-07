@@ -7,15 +7,16 @@ class Habit {
   List<bool> completedDays;
   final TimeOfDay? reminderTime;
   final bool notificationsEnabled;
+  final Color? color; // NUEVO
 
   Habit({
     required this.name,
     List<bool>? completedDays,
     this.reminderTime,
     this.notificationsEnabled = false,
+    this.color, // NUEVO
   }) : completedDays = completedDays ?? List.filled(7, false);
 
-  // ✅ Serializa usando 1 y 0 para evitar errores con SharedPreferences
   Map<String, dynamic> toJson() => {
         'name': name,
         'completedDays': completedDays.map((e) => e ? 1 : 0).toList(),
@@ -23,9 +24,9 @@ class Habit {
             ? '${reminderTime!.hour}:${reminderTime!.minute}'
             : null,
         'notificationsEnabled': notificationsEnabled,
+        'color': color?.value, // NUEVO
       };
 
-  // ✅ Deserializa usando 1 y 0 para reconstruir booleans correctamente
   factory Habit.fromJson(Map<String, dynamic> json) {
     final raw = json['completedDays'] ?? [];
     final parsed = List<bool>.from((raw as List).map((e) => e == 1));
@@ -42,11 +43,15 @@ class Habit {
       }
     }
 
+    final colorValue = json['color'];
+    final parsedColor = colorValue is int ? Color(colorValue) : null;
+
     return Habit(
       name: json['name'],
       completedDays: parsed.length == 7 ? parsed : List.filled(7, false),
       reminderTime: parsedTime,
       notificationsEnabled: json['notificationsEnabled'] ?? false,
+      color: parsedColor, // NUEVO
     );
   }
 }

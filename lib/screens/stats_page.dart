@@ -6,6 +6,8 @@ import '../providers/habit_provider.dart';
 import '../widgets/premium_stats_panel.dart';
 import '../widgets/charts/monthly_progress_chart.dart';
 import 'premium_page.dart';
+import '../widgets/habit_ranking_panel.dart';
+
 
 class StatsPage extends StatefulWidget {
   const StatsPage({super.key});
@@ -27,36 +29,61 @@ class _StatsPageState extends State<StatsPage> {
   Widget build(BuildContext context) {
     final provider = Provider.of<HabitProvider>(context);
 
-    if (!provider.isPremium) {
-      Future.microtask(() async {
-        final result = await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const PremiumPage()),
-        );
-        if (result == true) {
-          provider.activatePremium();
-        } else {
-          Navigator.pop(context);
-        }
-      });
-
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    // 🔀 Selección de página según índice
     final List<Widget> pages = [
       const PremiumStatsPanel(),
       const MonthlyProgressChart(),
-     const  Center(child: Text('🏆 Ranking de hábitos (pendiente)')),
+      const HabitRankingPanel(),
     ];
 
     return Scaffold(
       appBar: AppBar(title: const Text('Estadísticas')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: pages[_currentIndex],
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: pages[_currentIndex],
+          ),
+
+          // 🚫 Overlay si no es Premium
+          if (!provider.isPremium)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.6),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.lock, size: 60, color: Colors.white),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Función Premium bloqueada',
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+                      const SizedBox(height: 12),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.workspace_premium),
+                        label: const Text('Activar Premium'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const PremiumPage()),
+                          );
+                          if (result == true) {
+                            provider.activatePremium();
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
